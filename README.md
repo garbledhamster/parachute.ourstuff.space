@@ -1,26 +1,21 @@
 # Parachute Flower
 
-A responsive planning preview for the Flower exercise. Choose a petal, write a phrase or pop an idea, then review the entries together.
+Choose one of seven petals, write a phrase or pop a suggestion, then review or print your Flower. The preview keeps entries and drafts for the current browser session.
 
-Use the [latest preview](http://parachute.ourstuff.space:8857/) from the home network or home VPN. [V1](http://parachute.ourstuff.space:8857/v1/) preserves the earlier Flower editor. [V2](http://parachute.ourstuff.space:8857/v2/) is the approved planning baseline and current homepage. The direct VPN fallback is [the Mac address](http://10.200.0.59:8857/).
-
-This is a planning preview. Entries and drafts last for the open browser session. The repository is private and the preview runs on the Mac’s private network address.
+[Open the latest release](https://parachute.ourstuff.space/) or revisit [V1](https://parachute.ourstuff.space/v1/) and [V2](https://parachute.ourstuff.space/v2/). V2 is the current approved release.
 
 ## Where to work
 
-| Location | Purpose |
-| --- | --- |
-| `src/` | Working HTML, CSS, catalog, and app JavaScript |
-| `releases/v1/`, `releases/v2/` | Fixed review snapshots |
-| `latest.txt` | The approved snapshot served at the homepage |
-| [Planning and handoff](docs/PLAN.md) | Current decisions, mockups, and remaining work |
+- `src/` holds the editor, styles and suggestion catalog.
+- `releases/` holds numbered snapshots. Keep released snapshots intact.
+- `latest.txt` chooses the approved release served at the homepage.
+- [Planning and handoff](docs/PLAN.md) records the remaining product decisions.
 
-## Run and publish
+## Preview and publish
 
-Run `python3 serve.py --port 8857` for a local loopback preview when the port is available. Use another port if needed. The server reads `latest.txt` and serves release files only. Preview changes in `src/` independently with `python3 -m http.server 8858 --bind 127.0.0.1 --directory src`.
+1. Preview `src/` on loopback with `python3 -m http.server 8858 --bind 127.0.0.1 --directory src`.
+2. After approval, run `python3 release.py v3` with the next version number, then commit the snapshot and pointer on `main`.
+3. Run `python3 pages.py /path/to/new-output` to assemble the public site. Copy that output to a clean checkout of `gh-pages`, replacing the previous generated files. Review the diff, then commit and push `gh-pages`. Its root is the GitHub Pages publishing source.
+4. Verify the homepage, the new numbered route, and an older route on the custom domain. Cloudflare serves a DNS-only CNAME to `garbledhamster.github.io`.
 
-The Mac service is installed under the current user. Run `./preview.sh status` to check it, `./preview.sh stop` to stop it, or `./preview.sh start` to bring it back. On a fresh Mac, use `./preview.sh install <Mac LAN IP>`. Launchd runs the staged copy under `~/Library/Application Support/Parachute Preview`.
-
-When the next version is approved, review the relevant stage images and browser checks. Run `python3 release.py v3` to freeze the next snapshot and move the homepage pointer. Review and commit both the snapshot and pointer. Run `./preview.sh publish` on the Mac, verify the homepage and numbered URLs, then push main and the release tag. Leave existing numbered folders intact. To roll back the homepage, point `latest.txt` at the previous approved version, commit it, and publish again.
-
-The hostname’s DNS-only A record points to the Mac’s private address. Update the record and the service binding together if the Mac’s address changes. The VPN must route to that address. HTTP port 8857 is inside that private network.
+To roll back, point `latest.txt` at the prior release, commit the pointer on `main`, and rebuild the Pages branch. The numbered releases stay available.
