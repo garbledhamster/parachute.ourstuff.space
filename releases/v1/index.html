@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Parachute Flower · Interactive prototype</title>
+<style>
+#chute-flower{--paper:#fff;--ink:#24271f;--muted:#555c50;--line:#dce1d6;--blue:#2055a3;--bluewash:#eff5ff;--green:#2d6345;--greenwash:#edf6eb;--field:#f6f8f0;--cream:#fbf8ef;max-width:1240px;margin:auto;padding:24px clamp(14px,3vw,42px);background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,sans-serif;box-sizing:border-box}
+#chute-flower *{box-sizing:border-box}
+#chute-flower h1,#chute-flower h2,#chute-flower p{margin:0}
+#chute-flower h1,#chute-flower h2{font-family:Georgia,serif;font-weight:500;line-height:1.1;letter-spacing:-.025em}
+#chute-flower h1{font-size:clamp(2.25rem,4.7vw,3.75rem)}
+#chute-flower h2{font-size:clamp(1.65rem,3vw,2.35rem);overflow-wrap:anywhere}
+#chute-flower button{font:inherit;color:inherit;cursor:pointer}
+#chute-flower :is(button,summary,[role=button]):focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+#chute-flower button:disabled{cursor:default;opacity:.55}
+#chute-flower ::selection{background:#fbe197;color:var(--ink)}
+#chute-flower .mast{display:flex;justify-content:space-between;align-items:start;gap:12px 24px;flex-wrap:wrap;padding-bottom:20px}
+#chute-flower .intro{margin-top:8px;max-width:60ch;color:var(--muted)}
+#chute-flower .prototype{border:1px solid #e8d9ad;background:#fff6db;padding:4px 9px;color:#644717;font-size:.8rem;white-space:nowrap;margin-top:8px}
+#chute-flower .workspace{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);border:1px solid var(--line)}
+#chute-flower .garden{min-width:0;background:var(--field);padding:12px 14px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--line)}
+#chute-flower .garden > svg{display:block;width:min(100%,520px);height:auto;overflow:visible}
+#chute-flower .petal{cursor:pointer;outline:none}
+#chute-flower .petal path{fill:url(#chute-gold);stroke:#b17417;stroke-width:1.35;transition:fill .18s,stroke .18s}
+#chute-flower .petal.filled path{fill:url(#chute-full);stroke:#ac6514}
+#chute-flower .petal:hover path{stroke:var(--blue);stroke-width:2.5}
+#chute-flower .petal[aria-pressed=true] path,#chute-flower .petal:focus-visible path{stroke:var(--blue);stroke-width:3.2}
+#chute-flower .petal:focus-visible path{stroke-dasharray:5 2}
+#chute-flower .petal text{fill:#33250d;text-anchor:middle;font-size:15.4px;font-weight:700;pointer-events:none}
+#chute-flower .petal .petal-state{font-size:13.8px;font-weight:700;fill:#244d31}
+#chute-flower .petal:not(.filled) .petal-state{fill:#594413}
+#chute-flower .figure-caption{display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;width:100%;padding:4px 4px 0;color:var(--muted);font-size:.84rem}
+#chute-flower .control{min-height:42px;padding:7px 13px;background:var(--paper);border:1px solid #a9b6c9;border-radius:7px;color:var(--blue);font-weight:650;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+#chute-flower .control:not(:disabled):hover{background:var(--bluewash);border-color:var(--blue)}
+#chute-flower .control svg,#chute-flower .pick svg{width:16px;height:16px;flex:none}
+#chute-flower .desk{min-width:0;padding:clamp(16px,2.7vw,28px);display:flex;flex-direction:column}
+#chute-flower .deskhead{display:flex;flex-direction:column;align-items:start;gap:9px}
+#chute-flower .petal-index{font-size:.79rem;color:var(--blue);font-weight:750}
+#chute-flower .prompt{color:var(--muted)}
+#chute-flower .selections{border-block:1px solid var(--line);margin-top:16px;padding:10px 0 12px}
+#chute-flower .pick-label{font-size:.83rem;font-weight:700}
+#chute-flower .picks{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;max-height:112px;overflow:auto;padding:4px}
+#chute-flower .picks:has(.empty){padding:0}
+#chute-flower .empty{color:var(--muted);font-size:.84rem}
+#chute-flower .pick{background:var(--greenwash);border:1px solid #b8d2ba;color:var(--green);border-radius:18px;padding:6px 9px;min-height:40px;display:inline-flex;align-items:center;gap:7px;font-size:.83rem;font-weight:650}
+#chute-flower .pick:hover{border-color:var(--green);background:#deefdd}
+#chute-flower .ideahead{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;margin-top:15px}
+#chute-flower .ideahead strong{font-size:.95rem}
+#chute-flower .legend{display:inline-flex;align-items:center;gap:6px;font-size:.79rem;color:var(--muted)}
+#chute-flower .legend svg{width:27px;height:16px}
+#chute-flower .bubbles{display:flex;flex-wrap:wrap;align-items:center;align-content:start;gap:8px;min-height:164px;padding:10px 3px 12px}
+#chute-flower .bubble{max-width:100%;overflow-wrap:anywhere;min-height:calc(42px + 7px * var(--match));padding:5px calc(11px + 5px * var(--match));border-radius:100px;border:1px solid #bdcadf;background:var(--bluewash);color:#1b4480;font-size:.85rem;font-weight:650;transition:border-color .2s}
+#chute-flower .bubble:hover{border-color:var(--blue);background:#e1edff}
+#chute-flower .moreline{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-top:auto}
+#chute-flower .moreline .control{background:var(--blue);color:white;border-color:var(--blue)}
+#chute-flower .moreline .control:not(:disabled):hover{background:#153f7a}
+#chute-flower .note{font-size:.79rem;color:var(--muted)}
+#chute-flower .foot{margin-top:16px;color:var(--muted);display:grid;gap:8px;font-size:.83rem}
+#chute-flower summary{cursor:pointer;font-weight:700;color:var(--blue);width:fit-content;padding:4px 0}
+#chute-flower details p{padding:4px 0}
+#chute-flower .return{display:none}
+#chute-flower .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:760px){#chute-flower{padding-top:14px}#chute-flower .workspace{grid-template-columns:minmax(0,1fr)}#chute-flower .garden{border-right:0;border-bottom:1px solid var(--line)}#chute-flower .garden > svg{width:min(100%,410px)}#chute-flower .mast{padding-bottom:14px;gap:4px}#chute-flower .prototype{margin:0}#chute-flower .return{display:inline-flex;margin-bottom:10px}#chute-flower .bubbles{min-height:0}}
+@media(prefers-reduced-motion:reduce){#chute-flower *{transition:none!important}}
+
+#chute-flower .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:end}
+#chute-flower .custom{margin-top:9px}
+#chute-flower .custom form{display:flex;gap:7px;align-items:end;flex-wrap:wrap;margin:6px 0 4px}
+#chute-flower .custom label{display:grid;gap:4px;flex:1 1 190px;font-size:.83rem;font-weight:650}
+#chute-flower .custom input{width:100%;font:inherit;font-size:1rem;min-height:42px;border:1px solid #a9b6c9;border-radius:6px;padding:7px 9px;color:inherit;background:white}
+#chute-flower .custom input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#chute-flower .custom-msg{min-height:1.3em;color:#713922;font-size:.82rem}
+#chute-flower .print-only{display:none}
+@page{size:Letter portrait;margin:.52in .58in}
+@media print{
+  html,body{margin:0!important}
+  #chute-flower{display:block;max-width:none;margin:0;padding:0;color:#161616;font:10.5pt/1.38 Georgia,serif}
+  #chute-flower .mast,#chute-flower .workspace,#chute-flower .foot,#chute-flower .sr{display:none!important}
+  #chute-flower .print-only{display:block}
+  #chute-flower .print-page{position:relative;break-after:page}
+  #chute-flower .print-page:last-child{break-after:auto}
+  #chute-flower .print-head{padding-bottom:12pt;margin-bottom:14pt;border-bottom:1pt solid #222}
+  #chute-flower .print-head p{margin-top:5pt}
+  #chute-flower .print-head h1{font-size:28pt;letter-spacing:-.02em}
+  #chute-flower .print-head svg{width:59pt;height:59pt;float:right;margin:0 0 0 12pt}
+  #chute-flower .print-cols{display:grid;grid-template-columns:1fr 1fr;gap:20pt}
+  #chute-flower .print-petal{margin-bottom:11pt;break-inside:avoid}
+  #chute-flower .print-petal h2,#chute-flower .guide h2{font-size:12.5pt;line-height:1.17;font-weight:700;letter-spacing:0}
+  #chute-flower .print-petal h2{border-top:.55pt solid #777;padding-top:6pt}
+  #chute-flower .print-petal ul{margin:4pt 0 0;padding-left:14pt;font-size:9.75pt;line-height:1.26;overflow-wrap:anywhere}
+  #chute-flower .print-petal li span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  #chute-flower .print-petal p{margin-top:4pt;font-size:9.5pt}
+  #chute-flower .print-page .print-source{border-top:.55pt solid #777;padding-top:7pt;margin-top:12pt;font-size:8.5pt}
+  #chute-flower .guide p{margin-bottom:8pt}
+  #chute-flower .guide h2{margin:10pt 0 3pt}
+  #chute-flower .guide .guide-petals{margin:0;padding:0;list-style:none}
+  #chute-flower .guide .guide-petals li{margin:0 0 2pt}
+  #chute-flower .guide .next-lines{border-bottom:.55pt solid #888;min-height:18pt;margin-top:2pt}
+  #chute-flower .guide .print-source{margin-top:11pt}
+  #chute-flower .print-source a{color:inherit}
+  #chute-flower[data-print="options"] .print-page:not(.options-sheet){display:none}
+  #chute-flower .options-sheet .print-head{margin-bottom:7pt;padding-bottom:7pt}
+  #chute-flower .options-key{margin-bottom:9pt;font-size:10pt;line-height:1.25}
+  #chute-flower .options-petal{padding:2.5pt 0 2pt;border-top:.55pt solid #777;break-inside:avoid}
+  #chute-flower .options-petal h2{font-size:12pt;line-height:1.12;font-weight:700;letter-spacing:0;margin-bottom:1pt}
+  #chute-flower .options-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9pt}
+  #chute-flower .options-tiers h3{font:700 9pt/1.12 system-ui,sans-serif;margin:0 0 1pt}
+  #chute-flower .options-tiers ul{margin:0;padding-left:10pt;font-size:10pt;line-height:1.12}
+}
+</style>
+<style>.release-nav{font:14px/1.5 system-ui,sans-serif;display:flex;gap:12px;flex-wrap:wrap;max-width:1160px;margin:14px auto 0;padding:0 18px}.release-nav a{color:#2055a3}@media print{.release-nav{display:none}}</style><nav class="release-nav" aria-label="Preview versions"><strong>Planning preview</strong><a href="/">Latest</a><a href="/v1/">V1</a><a href="/v2/">V2</a></nav><main id="chute-flower">
+  <header class="mast">
+    <div><h1>The Parachute Flower</h1><p class="intro">Choose a petal and add ideas that fit. See how each pick changes the suggestions.</p></div>
+    <div class="actions"><span class="prototype">Interactive prototype</span><button type="button" class="control" id="chute-print">Print Flower</button><button type="button" class="control" id="chute-print-options">Print Options</button></div>
+  </header>
+  <div class="workspace">
+    <section class="garden" aria-label="The seven petals">
+      <svg viewBox="0 0 520 474" role="group" aria-label="Sunflower with seven selectable petals">
+        <defs>
+          <linearGradient id="chute-gold" x2=".2" y2="1"><stop stop-color="#ffe68c"/><stop offset="1" stop-color="#f9c64e"/></linearGradient>
+          <linearGradient id="chute-full" x2=".3" y2="1"><stop stop-color="#ffd267"/><stop offset="1" stop-color="#eea727"/></linearGradient>
+          <radialGradient id="chute-disc"><stop stop-color="#624221"/><stop offset="1" stop-color="#3a2918"/></radialGradient>
+        </defs>
+        <path d="M261 243c-22 67-26 138-8 220" fill="none" stroke="#427451" stroke-width="13" stroke-linecap="round"/>
+        <path d="M242 428c-58-1-90-25-105-60 52-4 92 14 105 60Zm5 14c47-42 88-43 120-35-24 37-68 52-120 35Z" fill="#71965c"/>
+        <path d="M238 426c-24-23-56-40-82-46m94 59c29-14 56-22 95-27" fill="none" stroke="#426c48" stroke-width="1.8"/>
+        <g id="chute-petals"></g>
+        <g pointer-events="none">
+          <circle cx="260" cy="217" r="65" fill="#aa711e"/>
+          <circle cx="260" cy="217" r="59" fill="url(#chute-disc)"/>
+          <g id="chute-seeds" fill="#d8a965" opacity=".57"></g>
+          <text id="chute-count" x="260" y="220" fill="#fff2d4" font-family="Georgia,serif" font-size="29" text-anchor="middle">0 / 7</text>
+          <text x="260" y="241" fill="#fff2d4" font-size="13" font-weight="600" text-anchor="middle">petals filled</text>
+        </g>
+      </svg>
+      <div class="figure-caption"><span>Pick any petal to explore.</span><button type="button" class="control" id="chute-reset">Reset flower</button></div>
+    </section>
+    <section class="desk" aria-labelledby="chute-category">
+      <button type="button" class="control return" id="chute-return">Back to flower</button>
+      <div class="deskhead"><span class="petal-index" id="chute-index"></span><h2 id="chute-category" tabindex="-1"></h2><p class="prompt" id="chute-prompt"></p></div>
+      <div class="selections"><div class="pick-label" id="chute-pick-label">On this petal</div><div class="picks" id="chute-picks" aria-labelledby="chute-pick-label"></div>
+        <details class="custom"><summary>Add your own</summary>
+          <form id="chute-custom"><label for="chute-entry">Short phrase (up to 55 characters)<input id="chute-entry" maxlength="55" required autocomplete="off"></label><button type="submit" class="control">Add entry</button></form>
+          <p class="custom-msg" id="chute-custom-msg" aria-live="polite"></p>
+        </details>
+      </div>
+      <div class="ideahead"><strong id="chute-ideas">Ideas to try</strong><span class="legend"><svg viewBox="0 0 28 16" fill="#d9e7ff" stroke="#2055a3" aria-hidden="true"><circle cx="6" cy="9" r="3.5"/><circle cx="20" cy="8" r="6.5"/></svg>Bigger = closer to your picks</span></div>
+      <div class="bubbles" id="chute-bubbles" role="group" aria-labelledby="chute-ideas"></div>
+      <div class="moreline"><button type="button" class="control" id="chute-more">Give me more</button><span class="note" id="chute-batch"></span></div>
+    </section>
+  </div>
+  <footer class="foot">
+    <p>The suggestions are general examples. The demo matches shared themes across petals. Size shows similarity, not importance. Refreshing clears your entries.</p>
+    <details><summary>Try the matching</summary><p>Open Skills and look at “Teach practical skills.” Then pick “Patient teachers” under People and return to Skills. The teaching bubble grows. Remove “Patient teachers” to see it shrink again.</p></details>
+  </footer>
+  <div class="print-only">
+    <section class="print-page" aria-label="Flower snapshot">
+      <div class="print-head"><svg id="chute-print-mark" viewBox="-43 -43 86 86" aria-hidden="true"></svg><h1>My Parachute Flower</h1><p id="chute-print-count"></p></div>
+      <div class="print-cols" id="chute-print-cols"></div>
+      <p class="print-source">A snapshot of your entries. Longer lists and phrases may be shortened to fit. See page 2 for ways to use your Flower.</p>
+    </section>
+    <section class="print-page guide" aria-label="Companion sheet">
+      <div class="print-head"><h1>Using Your Flower</h1><p>A companion for a career conversation</p></div>
+      <p>The Flower is a self-inventory from Richard N. Bolles’s <em>What Color Is Your Parachute?</em> It puts what you can do, what you enjoy, and what you need from work on one page. Use it to describe a good fit before you start looking at job titles.</p>
+      <p>If you’re coaching someone, ask for a real example behind a phrase they chose. If they get stuck, offer the Flower Options sheet and invite them to adapt one prompt.</p>
+      <h2>What the seven petals tell you</h2>
+      <ul class="guide-petals">
+        <li><strong>People:</strong> Who brings out your best work?</li>
+        <li><strong>Working conditions:</strong> What helps you do good work day to day?</li>
+        <li><strong>Transferable skills:</strong> What can you do well and want to keep using?</li>
+        <li><strong>Knowledge and interests:</strong> What subjects do you want to work with or learn more about?</li>
+        <li><strong>Compensation, responsibility, and rewards:</strong> What pay, benefits, and ownership do you need or want?</li>
+        <li><strong>Geography:</strong> Where can you do the work, and what needs to be nearby?</li>
+        <li><strong>Purpose:</strong> What do you want your work to contribute?</li>
+      </ul>
+      <h2>Find a theme across petals</h2>
+      <p>Circle two or three entries that reinforce each other. If you like explaining technical ideas, enjoy working with patient teammates, and want people to feel more capable, one theme might be helping people learn to use technology.</p>
+      <h2>Explore roles that might fit</h2>
+      <p>Turn the theme into a few search phrases. For the example above, try technical trainer, customer education, or developer education. Read real job descriptions and ask someone doing the work what a typical week looks like.</p>
+      <h2>Compare the opportunities you find</h2>
+      <p>Mark which entries are requirements and which are preferences. For each opportunity, write down what fits, what conflicts, and what you still need to ask. A role can use your favorite skills and still be a poor fit for your schedule or pay needs.</p>
+      <h2>Choose one next step</h2>
+      <p>Pick one thing you can do this week: ask for a short conversation, compare two postings, or revise a résumé bullet to show a skill the role needs.</p>
+      <p class="next-lines">My next step:</p>
+      <p class="print-source">Based on Richard N. Bolles’s Flower Exercise in <a href="https://www.penguinrandomhouse.com/books/706088/what-color-is-your-parachute-by-richard-n-bolles/"><em>What Color Is Your Parachute?</em></a> (Ten Speed Press, 2022). The examples and prompts on this page are a practical companion.</p>
+    </section>
+    <section class="print-page options-sheet" aria-label="Flower Options reference">
+      <div class="print-head"><h1>Flower Options</h1><p>Use these prompts when a petal feels hard to fill. Borrow a phrase or put it in your own words.</p></div>
+      <p class="options-key"><strong>Common</strong> offers familiar starting points. <strong>Uncommon</strong> gets more specific. <strong>Rare</strong> invites a less obvious thought. The tiers show different ways to think, without ranking answers or saying how often they occur.</p>
+      <section class="options-petal"><h2>1. People</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Reliable teammates</li><li>Supportive managers</li><li>Friendly customers</li><li>Patient mentors</li><li>Independent coworkers</li></ul></div><div><h3>Uncommon</h3><ul><li>Peers who share credit</li><li>Leads who give clear feedback</li><li>Partners who honor handoffs</li><li>Customers who ask questions</li><li>Peers who teach as they go</li></ul></div><div><h3>Rare</h3><ul><li>Colleagues who welcome dissent</li><li>Leaders who admit mistakes</li><li>Peers who spot who’s left out</li><li>Teams that share hard news early</li><li>People who think aloud together</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>2. Working conditions</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Predictable hours</li><li>Quiet workspace</li><li>Flexible start time</li><li>Remote work days</li><li>Clear deadlines</li></ul></div><div><h3>Uncommon</h3><ul><li>Meeting-free mornings</li><li>Written handoffs</li><li>Rotating on-call duty</li><li>Protected training time</li><li>A dedicated workbench</li></ul></div><div><h3>Rare</h3><ul><li>Fewer projects at once</li><li>Time to review mistakes</li><li>No after-hours messages</li><li>A choice of tools</li><li>Permission to pause unsafe work</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>3. Transferable skills</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Write clear instructions</li><li>Explain an idea</li><li>Plan a schedule</li><li>Repair equipment</li><li>Track a budget</li></ul></div><div><h3>Uncommon</h3><ul><li>Map a workflow</li><li>Lead a group discussion</li><li>Test a prototype</li><li>Resolve a complaint</li><li>Summarize interview notes</li></ul></div><div><h3>Rare</h3><ul><li>Catch missing assumptions</li><li>Translate across specialties</li><li>Design an effective handoff</li><li>Recover a stalled project</li><li>Turn a workaround into a routine</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>4. Knowledge and interests</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Cooking and food</li><li>Computers and software</li><li>Art and design</li><li>Health and fitness</li><li>History and culture</li></ul></div><div><h3>Uncommon</h3><ul><li>Building restoration</li><li>Wildlife conservation</li><li>Language learning</li><li>Public transit design</li><li>Renewable energy systems</li></ul></div><div><h3>Rare</h3><ul><li>Museum collections care</li><li>Soil and water testing</li><li>Assistive technology</li><li>Disaster logistics</li><li>How food supply chains work</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>5. Compensation, responsibility, and rewards</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>A steady salary</li><li>Health coverage</li><li>Paid time off</li><li>Retirement match</li><li>Paid overtime</li></ul></div><div><h3>Uncommon</h3><ul><li>Own a project budget</li><li>Supervise a small team</li><li>Set project priorities</li><li>Get paid for training</li><li>Earn a team bonus</li></ul></div><div><h3>Rare</h3><ul><li>Know the pay bands</li><li>Keep health coverage in transition</li><li>Return part time after leave</li><li>Take a funded sabbatical</li><li>Share in company ownership</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>6. Geography</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Short commute</li><li>Near family</li><li>Affordable housing</li><li>Near public transit</li><li>Work from home</li></ul></div><div><h3>Uncommon</h3><ul><li>Bikeable route to work</li><li>Near a major airport</li><li>Same time zone as the team</li><li>Within a school district</li><li>Near walking trails</li></ul></div><div><h3>Rare</h3><ul><li>Access to specialist care</li><li>Year-round road access</li><li>A backup internet provider</li><li>Easy trips to an aging parent</li><li>A route that avoids highways</li></ul></div></div>
+      </section>
+      <section class="options-petal"><h2>7. Purpose</h2>
+        <div class="options-tiers"><div><h3>Common</h3><ul><li>Teach useful skills</li><li>Make people safer</li><li>Help people find work</li><li>Build things that last</li><li>Care for the environment</li></ul></div><div><h3>Uncommon</h3><ul><li>Make services easier to use</li><li>Reduce food waste</li><li>Keep local history available</li><li>Help families navigate care</li><li>Make public spaces welcoming</li></ul></div><div><h3>Rare</h3><ul><li>Prevent avoidable rework</li><li>Keep essential services running</li><li>Help people challenge a decision</li><li>Pass on a disappearing craft</li><li>Restore trust after a mistake</li></ul></div></div>
+      </section>
+    </section>
+  </div>
+  <div class="sr" role="status" id="chute-status"></div>
+</main>
+<script>
+const ChuteFlower = (() => {
+  const raw = [["People", ["People"], "What kinds of colleagues bring out your best work?", ["Colleagues who welcome dissent|explore", "Customers who ask questions|explore", "Friendly customers|explore", "Independent coworkers|explore", "Leaders who admit mistakes|explore", "Leads who give clear feedback|explore", "Partners who honor handoffs|explore", "Patient mentors|explore", "Peers who share credit|care lead", "Peers who spot who’s left out|explore", "Peers who teach as they go|explore", "People who think aloud together|explore", "Reliable teammates|steady", "Supportive managers|explore", "Teams that share hard news early|explore"]], ["Working conditions", ["Working", "conditions"], "What helps you do your best work day to day?", ["A choice of tools|explore", "A dedicated workbench|explore", "Clear deadlines|explore", "Fewer projects at once|explore", "Flexible start time|remote steady", "Meeting-free mornings|focus", "No after-hours messages|explore", "Permission to pause unsafe work|explore", "Predictable hours|steady", "Protected training time|explore", "Quiet workspace|explore", "Remote work days|explore", "Rotating on-call duty|explore", "Time to review mistakes|explore", "Written handoffs|explore"]], ["Transferable skills", ["Transferable", "skills"], "What can you do well and would like to do more often?", ["Catch missing assumptions|explore", "Design an effective handoff|explore", "Explain an idea|explore", "Inspect a product for defects|explore", "Lead a group discussion|explore", "Map a workflow|explore", "Plan a schedule|explore", "Recover a stalled project|explore", "Repair equipment|explore", "Resolve a complaint|explore", "Summarize interview notes|explore", "Track a budget|explore", "Translate across specialties|explore", "Turn a workaround into a routine|explore", "Write clear instructions|explore"]], ["Knowledge and interests", ["Knowledge", "& interests"], "What subjects do you enjoy learning about or working with?", ["Art and design|explore", "Assistive technology|explore", "Building restoration|explore", "Cooking and food|explore", "Disaster logistics|explore", "Gardening and horticulture|explore", "Health and fitness|explore", "History and culture|explore", "How food supply chains work|explore", "Language learning|explore", "Museum collections care|explore", "Public transit design|explore", "Renewable energy systems|explore", "Soil and water testing|explore", "Wildlife conservation|explore"]], ["Compensation, responsibility, and rewards", ["Pay &", "rewards"], "What mix of pay, responsibility, and benefits would work for you?", ["A steady salary|explore", "Earn a team bonus|explore", "Get paid for training|explore", "Health coverage|explore", "Keep health coverage in transition|explore", "Know the pay bands|explore", "Own a project budget|explore", "Paid overtime|explore", "Paid time off|explore", "Retirement match|explore", "Return part time after leave|explore", "Set project priorities|explore", "Share in company ownership|explore", "Supervise a small team|explore", "Take a funded sabbatical|explore"]], ["Geography", ["Geography"], "Where would you like to live or work, and what needs to be nearby?", ["A backup internet provider|explore", "A route that avoids highways|explore", "Access to specialist care|explore", "Affordable housing|explore", "Bikeable route to work|explore", "Near a major airport|explore", "Near family|home care", "Near public transit|explore", "Near shops for daily errands|explore", "Near walking trails|explore", "Same time zone as the team|explore", "Short commute|steady home", "Within a school district|explore", "Work from home|remote focus", "Year-round road access|explore"]], ["Purpose", ["Purpose"], "What would you like your work to help people do?", ["Build things that last|explore", "Care for the environment|explore", "Help families navigate care|explore", "Help people challenge a decision|explore", "Help people find work|explore", "Keep essential services running|explore", "Keep local history available|explore", "Make people safer|explore", "Make public spaces welcoming|explore", "Make services easier to use|explore", "Pass on a disappearing craft|explore", "Prevent avoidable rework|explore", "Reduce food waste|explore", "Restore trust after a mistake|explore", "Teach useful skills|explore"]]];
+  const categories=raw.map(([name,label,prompt,items])=>({name,label,prompt,ideas:items.map(item=>{const [name,tags]=item.split('|');return {name,tags:tags.split(' ')}})}));
+  const words=name=>name.toLowerCase().match(/[a-z]+/g)?.map(word=>word.replace(/s$/,'')).filter(word=>word.length>=4)||[];
+  const getIdea=(state,c,i)=>categories[c].ideas[i]||state.custom[c][i-categories[c].ideas.length];
+  const initial=()=>({custom:categories.map(()=>[]),active:0,selected:categories.map(()=>[]),used:categories.map(()=>[]),batches:categories.map(()=>[])});
+  const match=(idea,state)=>{
+    const all=state.selected.flatMap((ids,c)=>ids.map(i=>getIdea(state,c,i)));
+    const themes=idea.tags.filter(tag=>all.some(pick=>pick.tags.includes(tag)));
+    const count=all.filter(pick=>pick.tags.some(tag=>themes.includes(tag))).length;
+    return Math.min(3,count+Math.max(0,themes.length-1));
+  };
+  function fresh(state,c){
+    const available=categories[c].ideas.map((idea,i)=>({i,weight:match(idea,state)}))
+      .filter(({i})=>!state.selected[c].includes(i)&&!state.used[c].includes(i));
+    available.sort((a,b)=>b.weight-a.weight||a.i-b.i);
+    const next=available.slice(0,8).map(({i})=>i);
+    return next.length?{...state,batches:state.batches.map((v,j)=>j===c?next:v),used:state.used.map((v,j)=>j===c?[...v,...next]:v)}:state;
+  }
+  function act(state,action){
+    const c=state.active;
+    if(action.type==='reset')return fresh(initial(),0);
+    if(action.type==='open')return state.batches[action.c].length?{...state,active:action.c}:fresh({...state,active:action.c},action.c);
+    if(action.type==='more')return fresh(state,c);
+    if(action.type==='custom'){
+      const name=action.name.trim().replace(/\s+/g,' ');
+      if(!name||state.selected[c].some(i=>getIdea(state,c,i).name.toLowerCase()===name.toLowerCase()))return state;
+      const existing=categories[c].ideas.findIndex(idea=>idea.name.toLowerCase()===name.toLowerCase());
+      if(existing>=0)return act(state,{type:'add',i:existing});
+      const terms=words(name);
+      const tags=[...new Set(categories.flatMap(cat=>cat.ideas.filter(idea=>words(idea.name).some(word=>terms.includes(word))).flatMap(idea=>idea.tags)))];
+      const i=categories[c].ideas.length+state.custom[c].length;
+      return {...state,selected:state.selected.map((v,j)=>j===c?[...v,i]:v),custom:state.custom.map((v,j)=>j===c?[...v,{name,tags}]:v)};
+    }
+    const list=state.selected[c];
+    const add=action.type==='add'&&!list.includes(action.i);
+    const remove=action.type==='remove'&&list.includes(action.i);
+    if(!add&&!remove)return state;
+    const selected=state.selected.map((v,j)=>j!==c?v:add?[...v,action.i]:v.filter(i=>i!==action.i));
+    const batches=remove&&state.used[c].includes(action.i)&&!state.batches[c].includes(action.i)?state.batches.map((v,j)=>j===c?[...v,action.i]:v):state.batches;
+    return {...state,selected,batches};
+  }
+  return {categories,match,act,initial,getIdea};
+})();
+</script>
+<script>
+(() => {
+  const root=document.getElementById('chute-flower');
+  const el=name=>root.querySelector('#chute-'+name);
+  const {categories,match,act,initial,getIdea}=ChuteFlower;
+  const drafts=categories.map(()=>'');
+  let state=act(initial(),{type:'reset'});
+  const svg='http://www.w3.org/2000/svg';
+  const icon=d=>'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="'+d+'"/></svg>';
+  el('more').insertAdjacentHTML('afterbegin',icon('M12 5v14m-7-7h14'));
+  el('print').insertAdjacentHTML('afterbegin',icon('M6 9V3h12v6M6 17H4a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M6 14h12v7H6zM17 12h1'));
+  el('reset').insertAdjacentHTML('afterbegin',icon('M4 11a8 8 0 1 1 2 6m-2-6V5m0 6h6'));
+  el('return').insertAdjacentHTML('afterbegin',icon('M12 19V5m-6 6 6-6 6 6'));
+  const petals=categories.map((cat,c)=>{
+    const a=c*360/7;
+    const theta=a*Math.PI/180;
+    const x=260+136*Math.sin(theta), y=217-136*Math.cos(theta);
+    const group=document.createElementNS(svg,'g');
+    group.classList.add('petal');
+    group.setAttribute('role','button');
+    group.setAttribute('tabindex','0');
+    group.innerHTML='<path transform="translate(260 217) rotate('+a+')" d="M-22 -42 C-45 -64 -67 -112 -60 -143 C-53 -176 -28 -197 -2 -205 C25 -198 53 -177 59 -145 C67 -111 45 -64 22 -42 Q0 -24 -22 -42Z"/><text x="'+x+'" y="'+(y-(cat.label.length===1?0:10))+'">'+cat.label.map((line,i)=>'<tspan x="'+x+'" dy="'+(i?17:0)+'">'+line+'</tspan>').join('')+'<tspan class="petal-state" x="'+x+'" dy="19"></tspan></text>';
+    const open=()=>{
+      drafts[state.active]=el('entry').value;
+      state=act(state,{type:'open',c});
+      el('entry').value=drafts[c];
+      el('custom-msg').textContent='';
+      render('Opened '+cat.name+'.');
+      if(window.matchMedia('(max-width:760px)').matches)el('category').focus({preventScroll:true}),el('return').scrollIntoView({block:'start'});
+    };
+    group.addEventListener('click',open);
+    group.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+    el('petals').append(group);
+    return group;
+  });
+  for(let i=0;i<86;i++){
+    const r=40+13*Math.sqrt((i+.5)/86), a=i*2.399963;
+    const seed=document.createElementNS(svg,'ellipse');
+    seed.setAttribute('cx',260+r*Math.cos(a));seed.setAttribute('cy',217+r*Math.sin(a));
+    seed.setAttribute('rx','1.25');seed.setAttribute('ry','1.65');el('seeds').append(seed);
+  }
+  function button(label,cls,action,i){
+    const b=document.createElement('button');b.type='button';b.className=cls;b.dataset.action=action;b.dataset.idea=i;
+    b.textContent=label;return b;
+  }
+  function render(message=''){
+    const c=state.active,cat=categories[c],selected=state.selected[c],visible=state.batches[c].filter(i=>!selected.includes(i));
+    const filled=state.selected.filter(items=>items.length).length;
+    el('count').textContent=filled+' / 7';
+    petals.forEach((p,i)=>{
+      const n=state.selected[i].length;
+      p.classList.toggle('filled',n>0);p.setAttribute('aria-pressed',i===c);
+      p.setAttribute('aria-label',categories[i].name+', '+n+(n===1?' pick':' picks'));
+      p.querySelector('.petal-state').textContent=n?n+(n===1?' pick':' picks'):'';
+    });
+    el('index').textContent='Petal '+(c+1)+' of 7';
+    el('category').textContent=cat.name;el('prompt').textContent=cat.prompt;
+    el('picks').replaceChildren(...selected.map(i=>{
+      const b=button(getIdea(state,c,i).name,'pick','remove',i);
+      b.insertAdjacentHTML('beforeend',icon('m7 7 10 10M17 7 7 17'));
+      b.setAttribute('aria-label','Remove '+getIdea(state,c,i).name);return b;
+    }));
+    if(!selected.length)el('picks').innerHTML='<span class="empty">Choose an idea to fill this petal.</span>';
+    el('bubbles').replaceChildren(...visible.map(i=>{
+      const idea=cat.ideas[i],score=match(idea,state),b=button(idea.name,'bubble','add',i);
+      b.style.setProperty('--match',score);
+      b.setAttribute('aria-label','Add '+idea.name+(score?', '+['','related','closely related','strongly related'][score]+' to your picks':''));
+      return b;
+    }));
+    const left=cat.ideas.length-state.used[c].length;
+    if(!visible.length)el('bubbles').innerHTML='<span class="empty">'+(left?'Choose “Give me more” for another set.':'You’ve seen all the examples for this petal.')+'</span>';
+    el('more').disabled=!left;el('reset').disabled=!filled && state.active===0 && state.used.every((v,j)=>j===0?v.length===8:!v.length);
+    el('batch').textContent=left?left+' more examples available':'All examples shown for this petal';
+    if(message)el('status').textContent=message;
+  }
+  root.addEventListener('click',event=>{
+    const b=event.target.closest('button[data-action]');
+    if(!b)return;
+    const i=Number(b.dataset.idea),type=b.dataset.action,name=getIdea(state,state.active,i).name;
+    const buttons=[...b.parentElement.querySelectorAll('button')],index=buttons.indexOf(b);
+    state=act(state,{type,i});
+    render(type==='add'?name+' added. Similar ideas may grow.':name+' removed. Similarity updated.');
+    const next=type==='add'?[...el('bubbles').querySelectorAll('button')][index]||el('bubbles').querySelector('button')||el('more'):
+      el('picks').querySelector('button')||el('bubbles').querySelector('button');
+    (next&&!next.disabled?next:el('category')).focus({preventScroll:true});
+  });
+  el('more').addEventListener('click',()=>{state=act(state,{type:'more'});render('Fresh ideas shown.');el('bubbles').querySelector('button')?.focus({preventScroll:true})});
+  el('return').addEventListener('click',()=>{petals[state.active].focus({preventScroll:true});el('petals').ownerSVGElement.scrollIntoView({block:'start'})});
+  el('reset').addEventListener('click',()=>{drafts.fill('');el('entry').value='';el('custom-msg').textContent='';state=act(state,{type:'reset'});render('Flower reset.');petals[0].focus({preventScroll:true})});
+  el('custom').addEventListener('submit',event=>{
+    event.preventDefault();
+    const name=el('entry').value.trim().replace(/\s+/g,' ');
+    const next=act(state,{type:'custom',name});
+    if(next===state){el('custom-msg').textContent=name?'That entry is already on this petal.':'Enter a short phrase.';return}
+    state=next;drafts[state.active]='';el('entry').value='';el('custom-msg').textContent='';
+    render(name+' added to '+categories[state.active].name+'.');el('entry').focus();
+  });
+  function printSnapshot(){
+    const cols=[document.createElement('div'),document.createElement('div')];
+    const measure=document.createElement('canvas').getContext('2d');
+    measure.font='13px Georgia';
+    const hasWideText=state.selected.some((ids,c)=>ids.slice(0,6).some(i=>measure.measureText(getIdea(state,c,i).name).width>305));
+    const limit=hasWideText?4:6;
+    categories.forEach((cat,c)=>{
+      const part=document.createElement('section');part.className='print-petal';
+      const title=document.createElement('h2');title.textContent=(c+1)+'. '+cat.name;
+      part.append(title);
+      const ids=state.selected[c];
+      if(ids.length){
+        const list=document.createElement('ul');
+        ids.slice(0,limit).forEach(i=>{const li=document.createElement('li'), phrase=document.createElement('span');phrase.textContent=getIdea(state,c,i).name;li.append(phrase);list.append(li)});
+        part.append(list);
+      }
+      if(!ids.length||ids.length>limit){
+        const p=document.createElement('p');
+        p.textContent=ids.length?(ids.length-limit)+' more in the interactive Flower.':'No entries yet.';
+        part.append(p);
+      }
+      cols[c<4?0:1].append(part);
+    });
+    const filled=state.selected.filter(items=>items.length).length;
+    el('print-count').textContent=filled+' of 7 petals filled';
+    el('print-cols').replaceChildren(...cols);
+    el('print-mark').innerHTML=categories.map((_,c)=>
+      '<ellipse cx="0" cy="-26" rx="8" ry="14" fill="'+(state.selected[c].length?'#333':'none')+'" stroke="#222" stroke-width="1.5" transform="rotate('+(c*360/7)+')"/>'
+    ).join('')+'<circle r="13" fill="none" stroke="#222" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="11">'+filled+'</text>';
+  }
+  el('print').addEventListener('click',()=>{
+    delete root.dataset.print;
+    window.print();
+  });
+  el('print-options').addEventListener('click',()=>{
+    root.dataset.print='options';
+    window.print();
+  });
+  window.addEventListener('afterprint',()=>{delete root.dataset.print});
+  window.addEventListener('beforeprint',printSnapshot);
+  render();printSnapshot();
+})();
+</script>
+</html>
+
